@@ -203,150 +203,530 @@
         let images = [];
         let currentImgIndex = null;
 
+
         /* LOGIN */
         function login() {
+
             if (document.getElementById("pass").value === "A1") {
+
                 document.getElementById("loginScreen").style.display = "none";
                 init();
-            } else alert("Wrong Password");
+
+            } else {
+
+                alert("Wrong Password");
+
+            }
+
         }
+
 
         /* HEADER */
         function updateHeader() {
+
             let d = new Date(date.value);
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+            const days = [
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday"
+            ];
+
             day.value = days[d.getDay()];
+
             let start = new Date(d.getFullYear(), 0, 0);
-            dayNo.value = Math.floor((d - start) / (1000 * 60 * 60 * 24));
+
+            dayNo.value = Math.floor(
+                (d - start) / (1000 * 60 * 60 * 24)
+            );
+
         }
+
+
 
         /* INIT */
         function init() {
-            date.value = new Date().toISOString().split("T")[0];
+
+            if (!date.value) {
+
+                date.value = new Date().toISOString().split("T")[0];
+
+            }
+
             updateHeader();
+
             load();
+
         }
 
-        /* KEY */
+
+
+        /* STORAGE KEY */
         function key() {
+
             return "report_" + date.value;
+
         }
+
+
 
         /* ADD ROW */
         function addRow() {
+
             let r = tbody.insertRow();
+
+
             r.innerHTML = `
-    <td>${tbody.rows.length}</td>
-    <td><input></td>
-    <td><input></td>
-    <td><input></td>
-    <td><input type="number"></td>
-    <td><input type="number"></td>
-    <td><input type="date"></td>
-    <td><input type="date"></td>
-    `;
-            r.querySelectorAll("input").forEach(i => i.oninput = save);
+        <td>${tbody.rows.length}</td>
+        <td><input></td>
+        <td><input></td>
+        <td><input></td>
+        <td><input type="number"></td>
+        <td><input type="number"></td>
+        <td><input type="date"></td>
+        <td><input type="date"></td>
+        `;
+
+
+            r.querySelectorAll("input").forEach(i => {
+
+                i.oninput = save;
+
+                i.onchange = save;
+
+            });
+
         }
+
+
 
         /* DELETE ROW */
         function deleteRow() {
+
             let p = prompt("Password:");
-            if (p !== "1234") return alert("Wrong");
-            if (tbody.rows.length > 0) {
-                tbody.deleteRow(-1);
-                save();
+
+            if (p !== "1234") {
+
+                alert("Wrong");
+                return;
+
             }
+
+
+            if (tbody.rows.length > 0) {
+
+                tbody.deleteRow(-1);
+
+                save();
+
+            }
+
         }
+
+
 
         /* SAVE */
         function save() {
+
+
             let data = [];
+
+
             [...tbody.rows].forEach(r => {
-                let row = [...r.querySelectorAll("input")].map(i => i.value);
+
+
+                let row = [...r.querySelectorAll("input")]
+                    .map(i => i.value);
+
+
                 data.push(row);
+
+
             });
-            localStorage.setItem(key(), JSON.stringify({ data, images }));
+
+
+
+            let report = {
+
+                date: date.value,
+
+                day: day.value,
+
+                dayNo: dayNo.value,
+
+                data: data,
+
+                images: images
+
+            };
+
+
+
+            localStorage.setItem(
+
+                key(),
+
+                JSON.stringify(report)
+
+            );
+
+
         }
+
+
 
         /* LOAD */
         function load() {
+
+
             tbody.innerHTML = "";
+
             imgBox.innerHTML = "";
+
             images = [];
 
-            let d = JSON.parse(localStorage.getItem(key()) || "{}");
+
+
+            let d = JSON.parse(
+
+                localStorage.getItem(key()) || "{}"
+
+            );
+
+
+
 
             if (d.data) {
+
+
+
                 d.data.forEach(r => {
+
+
+
                     addRow();
-                    [...tbody.lastChild.querySelectorAll("input")].forEach((i, j) => i.value = r[j] || "");
+
+
+
+                    [...tbody.lastChild.querySelectorAll("input")]
+
+                        .forEach((i, j) => {
+
+
+                            i.value = r[j] || "";
+
+
+                        });
+
+
+
                 });
+
+
+
             } else {
-                for (let i = 0; i < 5; i++) addRow();
+
+
+
+                for (let i = 0; i < 5; i++) {
+
+
+                    addRow();
+
+
+                }
+
+
             }
+
+
+
 
             if (d.images) {
+
+
+
                 images = d.images;
-                d.images.forEach((img, i) => addImage(img, i));
+
+
+
+                d.images.forEach((img, i) => {
+
+
+                    addImage(img, i);
+
+
+                });
+
+
+
             }
+
+
+
+            save();
+
+
         }
 
-        /* IMAGE */
-        document.getElementById("imgInput").addEventListener("change", function () {
-            let file = this.files[0];
-            let reader = new FileReader();
 
-            reader.onload = function () {
-                images.push({ src: reader.result });
-                addImage({ src: reader.result }, images.length - 1);
-                save();
-            }
-            reader.readAsDataURL(file);
-        });
 
+        /* IMAGE UPLOAD */
+        document.getElementById("imgInput")
+            .addEventListener("change", function () {
+
+
+                let file = this.files[0];
+
+
+                if (!file) return;
+
+
+
+                let reader = new FileReader();
+
+
+
+                reader.onload = function () {
+
+
+
+                    images.push({
+
+                        src: reader.result
+
+                    });
+
+
+
+                    addImage(
+
+                        { src: reader.result },
+
+                        images.length - 1
+
+                    );
+
+
+
+                    save();
+
+
+
+                };
+
+
+
+                reader.readAsDataURL(file);
+
+
+
+            });
+
+
+
+
+        /* SHOW IMAGE */
         function addImage(img, i) {
+
+
             let el = document.createElement("img");
+
+
             el.src = img.src;
 
-            el.onclick = () => {
+
+
+            el.onclick = function () {
+
+
+
                 currentImgIndex = i;
-                document.getElementById("imgModal").style.display = "flex";
-                document.getElementById("bigImg").src = img.src;
+
+
+
+                document.getElementById("imgModal")
+                    .style.display = "flex";
+
+
+
+                document.getElementById("bigImg")
+                    .src = img.src;
+
+
+
             };
 
+
+
             imgBox.appendChild(el);
+
+
+
         }
+
+
+
+
 
         /* DELETE IMAGE */
         function deleteImage() {
+
+
             let p = prompt("Delete password:");
+
+
+
             if (p !== "1234") return;
 
+
+
             images.splice(currentImgIndex, 1);
+
+
+
             save();
+
+
+
             closeImg();
+
+
+
             load();
+
+
+
         }
 
-        /* MODAL */
+
+
+
+
+        /* CLOSE IMAGE */
         function closeImg() {
-            document.getElementById("imgModal").style.display = "none";
+
+
+            document.getElementById("imgModal")
+                .style.display = "none";
+
+
         }
+
+
+
 
         /* HISTORY */
         function toggleHistory() {
+
+
             let h = document.getElementById("historyPanel");
-            h.style.display = h.style.display === "block" ? "none" : "block";
+
+
+
+            h.style.display =
+
+                h.style.display === "block"
+
+                    ? "none"
+
+                    : "block";
+
+
         }
+
+
+
+
 
         function loadByDate() {
-            date.value = document.getElementById("searchDate").value;
+
+
+            let selectedDate =
+                document.getElementById("searchDate").value;
+
+
+
+            if (!selectedDate) {
+
+                alert("Select date first");
+
+                return;
+
+            }
+
+
+
+            date.value = selectedDate;
+
+
+
             updateHeader();
+
+
+
             load();
+
+
+
         }
 
+
+
+
+
+
         /* DATE CHANGE */
-        date.onchange = () => { updateHeader(); load(); };
+        date.onchange = function () {
+
+
+            updateHeader();
+
+
+            load();
+
+
+            save();
+
+
+        };
+
+
+
+
+
+        /* AUTO SAVE */
+        document.addEventListener("input", function (e) {
+
+
+            if (e.target.tagName === "INPUT") {
+
+
+                save();
+
+
+            }
+
+
+        });
+
+
+
+
+
+        window.onbeforeunload = function () {
+
+
+            save();
+
+
+        };
+
+
 
     </script>
 
