@@ -379,99 +379,56 @@
 
 
 
-        /* LOAD */
         function load() {
 
+                tbody.innerHTML = "";
+                imgBox.innerHTML = "";
+                images = [];
 
-            tbody.innerHTML = "";
+                let report = localStorage.getItem(key());
 
-            imgBox.innerHTML = "";
+                if (!report) {
 
-            images = [];
+                    // New day → create empty report
+                    for (let i = 0; i < 5; i++) {
+                        addRow();
+                    }
 
+                    return;
+                }
 
+                let d = JSON.parse(report);
 
-            let d = JSON.parse(
+                if (d.data) {
 
-                localStorage.getItem(key()) || "{}"
+                    d.data.forEach(r => {
 
-            );
+                        addRow();
 
+                        [...tbody.lastChild.querySelectorAll("input")]
+                            .forEach((i, j) => {
 
+                                i.value = r[j] || "";
 
+                            });
 
-            if (d.data) {
-
-
-
-                d.data.forEach(r => {
-
-
-
-                    addRow();
-
-
-
-                    [...tbody.lastChild.querySelectorAll("input")]
-
-                        .forEach((i, j) => {
-
-
-                            i.value = r[j] || "";
-
-
-                        });
-
-
-
-                });
-
-
-
-            } else {
-
-
-
-                for (let i = 0; i < 5; i++) {
-
-
-                    addRow();
-
+                    });
 
                 }
 
+                if (d.images) {
+
+                    images = d.images;
+
+                    d.images.forEach((img, i) => {
+
+                        addImage(img, i);
+
+                    });
+
+                }
 
             }
-
-
-
-
-            if (d.images) {
-
-
-
-                images = d.images;
-
-
-
-                d.images.forEach((img, i) => {
-
-
-                    addImage(img, i);
-
-
-                });
-
-
-
-            }
-
-
-
-            save();
-
-
-        }
 
 
 
@@ -679,22 +636,19 @@
 
 
 
+    /* DATE CHANGE */
+    date.onchange = function () {
 
-        /* DATE CHANGE */
-        date.onchange = function () {
+        // Save current day's report before switching
+        save();
 
+        // Update the new date header
+        updateHeader();
 
-            updateHeader();
+        // Load the report for the selected date
+        load();
 
-
-            load();
-
-
-            save();
-
-
-        };
-
+    };
 
 
 
