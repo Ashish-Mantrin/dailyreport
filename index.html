@@ -291,12 +291,36 @@
         <td><input type="date"></td>
         `;
 
+            const inputs = r.querySelectorAll("input");
 
-            r.querySelectorAll("input").forEach(i => {
+            inputs.forEach(i => {
 
                 i.oninput = save;
-
                 i.onchange = save;
+
+            });
+
+            // Production Date input (7th column)
+            const prodInput = inputs[5];
+
+            // Expiry Date input (8th column)
+            const expInput = inputs[6];
+
+            prodInput.addEventListener("change", function () {
+
+                if (!this.value) return;
+
+                let d = new Date(this.value);
+
+                // Add 1 year
+                d.setFullYear(d.getFullYear() + 1);
+
+                // Minus 1 day
+                d.setDate(d.getDate() - 1);
+
+                expInput.value = d.toISOString().split("T")[0];
+
+                save();
 
             });
 
